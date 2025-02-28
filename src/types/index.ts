@@ -32,6 +32,12 @@ export interface Settings {
   temperature: number;
   systemPrompt: string;
   functions: FunctionDefinition[];
+  tushareApiKey?: string;
+  tushareFunctions?: Array<{
+    name: string;
+    description: string;
+    parameters: Record<string, unknown>;
+  }>;
 }
 
 export interface ChatSettings {

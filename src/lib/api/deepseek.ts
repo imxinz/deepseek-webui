@@ -48,6 +48,8 @@ export async function chatCompletion(
       throw new Error('请先在设置页面配置您的 DeepSeek API Key');
     }
 
+    console.log('API_CONFIG', API_CONFIG);
+
     const response = await fetch(`${API_CONFIG.BASE_URL}/chat/completions`, {
       method: 'POST',
       headers: {
@@ -59,7 +61,7 @@ export async function chatCompletion(
         model: API_CONFIG.MODELS[settings.model as keyof typeof API_CONFIG.MODELS],
         messages: messages.map(({ role, content }) => ({ role, content })),
         temperature: settings.temperature,
-        ...(tools && tools.length > 0 ? { tools } : {}),
+        // ...(tools && tools.length > 0 ? { tools } : {}),
         stream: true,
       }),
     });
