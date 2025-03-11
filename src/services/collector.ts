@@ -1,3 +1,5 @@
+import { headers } from 'next/headers';
+import { logger } from 'next/logger';
 import axios from 'axios';
 import { dataSource } from '@/lib/store/db';
 import { StockTrade } from '@/entities/trade';
@@ -5,13 +7,27 @@ import { API_CONFIG } from '@/lib/api/config';
 
 export class CollectorService {
     private stockTradeRepo;
+    private readonly logger = logger.withTag('StockCollector');
 
     constructor() {
+        const requestHeaders = headers();
+        const requestId = requestHeaders.get('x-request-id') || crypto.randomUUID();
+
+        // 为所有日志添加请求上下文
+        this.logger = this.logger.with({
+            requestId,
+            service: 'stock-collector'
+        });
         // 添加数据库连接检查
         if (!dataSource.isInitialized) {
             dataSource.initialize().then(() => {
                 this.stockTradeRepo = dataSource.getRepository(StockTrade);
+                this.logger.info('Database connection established!');
             }).catch(error => {
+                this.logger.error('Database connection failed', {
+                    error: error.stack,
+                    dbConfig: dataSource.options // 自动过滤敏感字段
+                });
                 throw new Error(`数据库连接失败: ${error.message}`);
             });
         } else {
@@ -39,7 +55,14 @@ export class CollectorService {
 
     // 采集股票数据
     async collectStockData(options = { market: 'sh_a', pageSize: 100, maxPages: 40 }) {
+        const executionContext = this.logger.withTiming();
+
         try {
+            executionContext.info('Starting stock data collection', { 
+                market: options.market,
+                parameters: options 
+            });
+
             const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
             const existingSymbols = await this.getExistingSymbols(today); // 新增存在性检查
 
@@ -93,6 +116,14 @@ export class CollectorService {
                 }
             }
 
+            executionContext.success('Collection completed', { 
+                duration: executionContext.getTiming(),
+                totalCollected: collectedData.length,
+                successCount,
+                skippedCount: collectedData.length - newData.length,
+                failedCount: collectedData.length - successCount
+            });
+
             return {
                 success: true,
                 totalCollected: collectedData.length,
@@ -101,7 +132,11 @@ export class CollectorService {
                 failedCount: collectedData.length - successCount
             };
         } catch (error: any) {
-            console.error('数据采集失败:', error);
+            executionContext.error('Collection failed', {
+                error: error.stack,
+                market: options.market,
+                elapsed: executionContext.getTiming()
+            });
             throw new Error(`股票数据采集失败: ${error.message}`);
         }
     }
