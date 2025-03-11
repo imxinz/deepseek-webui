@@ -4,14 +4,14 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSettingsStore } from '@/lib/store/settings-store';
 
-const routes = ['/chat', '/templates', '/settings', '/workflows', '/functions'] as const;
+const routes = ['/chat', '/templates', '/settings', '/workflows', '/functions', '/stock'] as const;
 type ValidRoute = typeof routes[number];
 
 function isValidRoute(path: string): path is ValidRoute {
   return routes.some(route => path.startsWith(route));
 }
 
-const PUBLIC_PATHS = ['/settings', '/functions', '/workflows'];
+const PUBLIC_PATHS = ['/settings', '/functions', '/workflows', '/stock'];
 
 export function RouteGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();

@@ -7,6 +7,7 @@ export const API_CONFIG = {
     'coder': 'deepseek-coder',
     'reasoner': 'deepseek-reasoner',
   },
+  SINA_API_KEY: 'cffd5e931e5cb2f1b391b84194ff91eb'
 } as const;
 
 export type ModelType = keyof typeof API_CONFIG.MODELS; 

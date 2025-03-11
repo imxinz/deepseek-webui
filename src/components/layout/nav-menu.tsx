@@ -33,6 +33,11 @@ const menuItems = [
     label: <Link href="/workflows ">COZE插件配置</Link>,
   },
   {
+    key: '/stock',
+    icon: <SettingOutlined />,
+    label: <Link href="/stock">股池</Link>,
+  },
+  {
     key: '/functions',
     icon: <SettingOutlined />,
     label: <Link href="/settings">设置</Link>,
