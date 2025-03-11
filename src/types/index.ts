@@ -48,4 +48,4 @@ export interface ChatSettings {
   systemPrompt: string;
   model: 'chat' | 'coder';
   functions: FunctionDefinition[];
-} 
+}
