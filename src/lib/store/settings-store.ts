@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { API_CONFIG } from '../api/config';
 import { ChatSettings, FunctionDefinition } from '@/types';
 
 interface SettingsState {
@@ -145,7 +146,7 @@ export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
       settings: defaultSettings,
-      apiKey: '',
+      apiKey: API_CONFIG.DEEPSEEK_API_KEY,
       updateSettings: (newSettings) =>
         set((state) => ({
           settings: { ...state.settings, ...newSettings },

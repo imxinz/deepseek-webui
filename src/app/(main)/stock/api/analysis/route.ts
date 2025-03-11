@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ data });
   } catch (error) {
     return NextResponse.json(
-      { error: 'Analysis failed', details: error.message },
+      { error: 'Analysis failed', details: JSON.stringify(error) },
       { status: 500 }
     );
   }
