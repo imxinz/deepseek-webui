@@ -38,17 +38,9 @@ const nextConfig = {
       },
     ];
   },
-  logging: {
-    level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-    format: 'json',
-    transport: {
-      target: '@next/logger/file-transport',
-      options: {
-        dir: 'logs',
-        maxSize: '10m'
-      }
-    }
-  }
+  experimental: {
+    instrumentationHook: true,
+  },
 };
 
 module.exports = nextConfig;
