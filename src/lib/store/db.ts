@@ -7,7 +7,7 @@ const dbConfig = {
     username: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || 'xinz1234',
     database: process.env.DB_NAME || 'jucai_app',
-    ssl: process.env.DB_SSL ? { rejectUnauthorized: false } : null
+    ssl: null //process.env.DB_SSL ? { rejectUnauthorized: false } : null
 };
 
 // console.log(dbConfig, path.join(__dirname, 'entities', '*.{js,ts}'));
