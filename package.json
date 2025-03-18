@@ -14,6 +14,7 @@
     "@types/uuid": "^10.0.0",
     "antd": "^5.14.1",
     "axios": "^1.8.1",
+    "clsx": "^2.1.1",
     "framer-motion": "^11.18.1",
     "mysql2": "^3.12.0",
     "next": "^15.2.1",
@@ -27,6 +28,7 @@
     "react-syntax-highlighter": "^15.5.0",
     "reflect-metadata": "^0.2.2",
     "swr": "^2.3.2",
+    "tailwind-merge": "^3.0.2",
     "typeorm": "^0.3.20",
     "uuid": "^11.0.5",
     "zustand": "^4.5.1"

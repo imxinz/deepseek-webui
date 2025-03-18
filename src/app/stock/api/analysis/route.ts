@@ -23,9 +23,10 @@ export async function GET(request: NextRequest) {
       case 'composite':
         data = await service.getCompositeConditionStocks();
         break;
-      case 'volume-surge':
-        const multiple = Number(searchParams.get('n')) || 1.5;
-        data = await service.getVolumeSurgeStocks(multiple);
+      case 'transcation':
+        const days = Number(searchParams.get('n')) || 3;
+        const multiple = Number(searchParams.get('x')) || 1.5;
+        data = await service.getVolumeSurgeByDays(days, multiple);
         break;
       default:
         return NextResponse.json(

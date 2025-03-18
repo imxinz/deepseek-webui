@@ -1,6 +1,6 @@
 import { dataSource } from '@/lib/store/db';
 import { StockTrade } from '@/entities/trade';
-import { Like, MoreThanOrEqual, In } from 'typeorm';
+import { Like, MoreThanOrEqual, In, Between } from 'typeorm';
 
 export class StockAnalysisService {
     private stockTradeRepo;
@@ -113,34 +113,88 @@ export class StockAnalysisService {
             .map(([symbol]) => symbol);
     }
 
-    // 近7天成交量倍量
-    async getVolumeSurgeStocks(n: number = 1.5) {
+    /**
+     * 量价首次异动选股
+     * 1. 今日收盘价是近n天最高价
+     * 2. 近n天累计涨幅大于0小于20
+     * 3. 今日量是近n天平均量x倍
+     * @param n 时间周期n天
+     * @param x 当日成交量是近n天均量的x倍
+     * @returns 
+     */
+    async getVolumeSurgeByDays(n: number = 5, x: number = 2) {
         const today = this.getTodayDate();
 
         if (this.stockTradeRepo) {
             return this.stockTradeRepo.query(`
-                SELECT t.symbol
-                    FROM (
-                    SELECT 
-                        s1.symbol,
-                        s1.date,
-                        s1.volume,
-                        (SELECT AVG(s2.volume) 
-                        FROM stock_trade s2 
-                        WHERE s2.symbol = s1.symbol 
-                        AND s2.date BETWEEN DATE_FORMAT(s1.date - INTERVAL 6 DAY, '%Y%m%d') 
-                                        AND s1.date
-                        ) as ma7_volume
-                    FROM stock_trade s1
-                    WHERE s1.date BETWEEN DATE_FORMAT(? - INTERVAL 3 DAY, '%Y%m%d') AND ?
-                    ) t
-                    WHERE t.volume >= t.ma7_volume * ?
-                    GROUP BY t.symbol
-                    HAVING COUNT(DISTINCT t.date) = 3
-            `, [today, today, n]);
+                SELECT 
+                s1.symbol,
+                s1.name,
+                s1.code,
+                s1.trade AS price,
+                s1.changepercent AS changepercent,
+                s1.volume,
+                (s1.volume / ma.ma_volume) AS ratio
+            FROM stock_trade s1
+            INNER JOIN (
+                SELECT 
+                    main.symbol,
+                    AVG(main.volume) AS ma_volume,
+                    MAX(main.trade) AS max_price,
+                    (
+                        SELECT trade 
+                        FROM stock_trade prev 
+                        WHERE prev.symbol = main.symbol 
+                        AND prev.date = DATE_FORMAT(? - INTERVAL ? DAY, '%Y%m%d')
+                        LIMIT 1
+                    ) AS start_price
+                FROM stock_trade main
+                WHERE main.date BETWEEN DATE_FORMAT(? - INTERVAL ? DAY, '%Y%m%d') 
+                                  AND DATE_FORMAT(? - INTERVAL 1 DAY, '%Y%m%d')
+                GROUP BY main.symbol
+                HAVING start_price IS NOT NULL
+            ) ma ON s1.symbol = ma.symbol
+            WHERE s1.date = ?
+              AND s1.volume >= ma.ma_volume * ?
+              AND s1.trade >= ma.max_price
+              AND (s1.trade - ma.start_price)/ma.start_price * 100 BETWEEN 0 AND 20
+            GROUP BY s1.symbol  -- 添加 GROUP BY 去重
+            ORDER BY ratio DESC
+            `, [today, n, today, n, today, today, x]);
         }
 
         return [];
     }
 
+    /**
+     * 获取指定股票的近n天数据
+     * @param symbols 
+     * @param n 
+     * @returns 
+     */
+    async getStocksDataInDays(symbols: string[], n: number) {
+        if (!symbols.length || n <= 0) return [];
+        const today = this.getTodayDate();
+        const startDate = this.getDateStringBeforeDays(n);
+    
+        if (this.stockTradeRepo) {
+            return this.stockTradeRepo.find({
+                where: {
+                    symbol: In(symbols),
+                    date: Between(startDate, today)
+                },
+                order: {
+                    symbol: "ASC",
+                    date: "DESC" // 按日期倒序排列，最新日期在前
+                }
+            });
+        }
+        return [];
+    }
+    
+    private getDateStringBeforeDays(days: number) {
+        const date = new Date();
+        date.setDate(date.getDate() - days);
+        return date.toISOString().slice(0, 10).replace(/-/g, '');
+    }
 }

@@ -38,7 +38,7 @@ const menuItems = [
     label: <Link href="/stock">股池</Link>,
   },
   {
-    key: '/functions',
+    key: '/settings',
     icon: <SettingOutlined />,
     label: <Link href="/settings">设置</Link>,
   },

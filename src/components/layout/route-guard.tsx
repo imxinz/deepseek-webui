@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSettingsStore } from '@/lib/store/settings-store';
 
-const routes = ['/chat', '/templates', '/settings', '/workflows', '/functions', '/stock'] as const;
+const routes = ['/chat', '/templates', '/settings', '/workflows', '/functions', '/stock', '/recom'] as const;
 type ValidRoute = typeof routes[number];
 
 function isValidRoute(path: string): path is ValidRoute {
