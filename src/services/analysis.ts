@@ -197,4 +197,6 @@ export class StockAnalysisService {
         date.setDate(date.getDate() - days);
         return date.toISOString().slice(0, 10).replace(/-/g, '');
     }
+
+    
 }
