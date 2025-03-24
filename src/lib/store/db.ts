@@ -1,4 +1,5 @@
 import { DataSource } from 'typeorm';
+import { Stock } from '@/entities/stock';
 import { StockTrade } from '@/entities/trade';
 
 const dbConfig = {
@@ -15,7 +16,7 @@ const dbConfig = {
 export const dataSource = new DataSource({
     type: 'mysql',
     ...dbConfig,
-    entities: [StockTrade], // 注册使用的实体
+    entities: [Stock, StockTrade], // 注册使用的实体
     synchronize: process.env.NODE_ENV !== 'production', // 生产环境禁用
     logging: process.env.NODE_ENV === 'development',
     extra: {
